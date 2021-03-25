@@ -1,8 +1,10 @@
 import Game from "../models/gameModel.js";
+import Round from "../models/roundModel.js";
 import Card from "../models/cardModel.js";
 import {initDeck} from "./cardController.js";
 
 let gameId = '';
+let story = '';
 
 export const startGame = async (req, res) => {
 
@@ -41,7 +43,20 @@ export const updateDeck = async (cardsDrawn) => {
 
     const updatedGame = {...game._doc, deck: newDeck, date: new Date()};
 
-    const gamez =  Game.findByIdAndUpdate(updatedGame._id, updatedGame, {new: true});
+    const gamez = Game.findByIdAndUpdate(updatedGame._id, updatedGame, {new: true});
     // console.log(gamez);
     return gamez;
+}
+
+export const submitStory = async (req, res) => {
+    story = req?.body.story || 'I have no story';
+    console.log(story);
+
+    try {
+        const round = await new Round({story: story}).save();
+        res.status(200).json(story);
+    } catch (error) {
+        res.status(409).json({message: error});
+    }
+
 }

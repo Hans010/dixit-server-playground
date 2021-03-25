@@ -18,9 +18,10 @@ const gameSchema = mongoose.Schema({
 // });
 //
 // const roundSchema = mongoose.Schema({
-//     round: [playerMoveSchema]
+//     round: [playerMoveSchema],
+//     story: String
 // });
 
-const Game =  mongoose.model('Game', gameSchema);
+const Game = mongoose.model('Game', gameSchema);
 
 export default Game;
