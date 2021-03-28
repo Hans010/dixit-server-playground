@@ -1,5 +1,5 @@
 import Card from '../models/cardModel.js';
-import {updateDeck} from "./gameController.js";
+import {updateDeck, reshuffleDeck} from "./gameController.js";
 
 let startingDeck = [];
 let playedCards = [];
@@ -59,11 +59,9 @@ export const createCard = async (req, res) => {
 };
 
 const drawCards = (i) => {
+
+    if (i > startingDeck.length) startingDeck = reshuffleDeck();
     return startingDeck.splice(0, i);
-    // const drawnObjects = startingDeck.splice(0, i);
-    // const drawnIds = [];
-    // drawnObjects.map (card => {
-    //     drawnIds.push(String(card._id));
-    // })
-    // return drawnIds;
 }
+
+

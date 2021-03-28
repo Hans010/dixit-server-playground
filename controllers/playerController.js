@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Player from '../models/playerModel.js';
+import {addPlayer} from "./gameController.js";
 
 export const getPlayers = async (req, res) => {
     try {
@@ -12,11 +13,12 @@ export const getPlayers = async (req, res) => {
 
 export const createPlayer = async (req, res) => {
 
-    const newPlayer = new Player({...res.body});
+    const newPlayer = new Player(req.body);
 
     try {
-        await newPlayer.save();
+        const generatedPlayer = await newPlayer.save();
         res.status(201).json(newPlayer);
+        addPlayer(generatedPlayer);
     } catch (error) {
         res.status(409).json({message: error.message});
     }
