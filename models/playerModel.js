@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 
 const playerSchema = mongoose.Schema({
     name: String,
+    clientId: String,
     score: {type: Number, default: 0},
     imgUrl: {type: String, default: ''},
-    date: {type: Date, default: Date.now()}
+    date: {type: Date, default: Date.now()},
 })
 
 const Player = mongoose.model('Player', playerSchema);

@@ -1,8 +1,9 @@
 import Card from '../models/cardModel.js';
-import {updateDeck, reshuffleDeck} from "./gameController.js";
+import {updateDeck} from "./gameController.js";
+import Game from "../models/gameModel.js";
 
 let startingDeck = [];
-let playedCards = [];
+let discardDeck = [];
 
 export const getCards = async (req, res) => {
 
@@ -25,6 +26,11 @@ export const initDeck = async () => {
         console.log(error.message);
     }
 };
+
+export const updateDecksFromGame = (deck, discard) => {
+    startingDeck = [...deck];
+    discardDeck = [...discard];
+}
 
 export const dealCards = (req, res) => {
 
@@ -65,3 +71,8 @@ const drawCards = (i) => {
 }
 
 
+export const shuffleDeck = (deck, discard) => {
+    const newDeck = deck.concat(discard).sort(() => Math.random() - 0.5);
+    Game.findByIdAndUpdate(gameId, {...game._doc, deck: newDeck, discard: []});
+    return newDeck;
+}

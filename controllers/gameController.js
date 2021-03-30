@@ -1,65 +1,76 @@
 import Game from "../models/gameModel.js";
-import Round from "../models/roundModel.js";
-import Card from "../models/cardModel.js";
-import {initDeck} from "./cardController.js";
+import {initDeck, updateDecksFromGame} from "./cardController.js";
+import mongoose from "mongoose";
 
-let gameId = '';
-let story = '';
-let players = [];
+let currentGame = {};
+export let players = [];
 
 export const startGame = async (req, res) => {
 
+    console.log('start game');
+
+    if (currentGame?._id) {
+        console.log('I already have a game');
+        updateDecksFromGame(currentGame.deck, currentGame.discard);
+        try {
+            res.status(201).json(currentGame._id);
+        } catch (error) {
+            res.status(409).json({message: error});
+        }
+        return
+    }
+
+    currentGame = await Game.findById(req.body.gameId);
+
+    if (currentGame) {
+        console.log('retrieving an existing game');
+        await updateExistingGame(currentGame);
+    } else {
+        console.log('creating a new game ');
+        const newGame = await startNewGame();
+        try {
+            currentGame = await new Game(newGame).save();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    try {
+        res.status(201).json(currentGame._id);
+    } catch (error) {
+        res.status(409).json({message: error});
+    }
+}
+
+const updateExistingGame = (currentGame) => async (req, res) => {
+    updateDecksFromGame(currentGame.deck, currentGame.discard);
+}
+
+const startNewGame = async (currentGame) => {
     const startingDeck = await initDeck();
 
-    const game = {
+    const newGame = {
         deck: startingDeck,
         discard: [],
     }
 
-    if (startingDeck) console.log('starting game');
+    return newGame
 
-    try {
-        const startedGame = await new Game(game).save();
-        gameId = startedGame._id;
-        res.status(201).json(gameId);
-    } catch (error) {
-        res.status(409).json({message: error});
-    }
-};
+}
 
 export const updateDeck = async (cardsDrawn) => {
 
-    let game = {};
-    try {
-        game = await Game.findById(gameId);
-    } catch (error) {
-        console.log(error);
-    }
-
-    const newDeck = game.deck.filter(card => (
+    const newDeck = currentGame.deck.filter(card => (
         !cardsDrawn.some(({_id}) => {
             return JSON.stringify(_id) === JSON.stringify(card._id);
         })
     ));
 
-    const newDiscard = game.discard.concat(cardsDrawn);
+    const newDiscard = currentGame.discard.concat(cardsDrawn);
 
-    const updatedGame = {...game._doc, deck: newDeck, discard: newDiscard, date: new Date()};
+    const updatedGame = {...currentGame._doc, deck: newDeck, discard: newDiscard, date: new Date()};
 
-    const gamez = Game.findByIdAndUpdate(updatedGame._id, updatedGame, {new: true});
-    // console.log(gamez);
-    return gamez;
-}
-
-export const submitStory = async (req, res) => {
-    story = req?.body.story || 'I have no story';
-
-    try {
-        const round = await new Round({story: story}).save();
-        res.status(200).json(story);
-    } catch (error) {
-        res.status(409).json({message: error});
-    }
+    return Game.findByIdAndUpdate(updatedGame._id, updatedGame, {new: true});
 }
 
 export const registerPlayer = async (req, res) => {
@@ -72,14 +83,9 @@ export const registerPlayer = async (req, res) => {
     }
 }
 
-export const reshuffleDeck = () => {
-    const game = Game.findById(gameId);
-    const newDeck = game.deck.concat(game.discard).sort(() => Math.random() - 0.5);
-    Game.findByIdAndUpdate(gameId, {...game._doc, deck: newDeck, discard: []});
-    return newDeck;
-}
-
 export const addPlayer = (newPlayer) => {
     if (players.length === 0 || players.every(player => player._id !== newPlayer._id))
         players.push(newPlayer);
+    console.log('added player', players);
 }
+
