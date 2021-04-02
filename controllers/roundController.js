@@ -1,7 +1,17 @@
 
 let story = '';
+let cardsInPlay = [];
 
 export const submitStory = (newStory) => {
     story = newStory;
-    console.log('roundController got a new story', story);
+}
+
+export const addCardToPlay = card => {
+    cardsInPlay.push(card);
+    return cardsInPlay;
+}
+
+export const newRound = () => {
+    story = '';
+    cardsInPlay = [];
 }

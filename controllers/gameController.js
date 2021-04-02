@@ -1,32 +1,21 @@
 import Game from "../models/gameModel.js";
 import {initDeck, updateDecksFromGame} from "./cardController.js";
-import mongoose from "mongoose";
 
 let currentGame = {};
 export let players = [];
+
+// GAME
 
 export const startGame = async (req, res) => {
 
     console.log('start game');
 
-    if (currentGame?._id) {
-        console.log('I already have a game');
-        updateDecksFromGame(currentGame.deck, currentGame.discard);
-        try {
-            res.status(201).json(currentGame._id);
-        } catch (error) {
-            res.status(409).json({message: error});
-        }
-        return
-    }
+    console.log('do i have a game?', currentGame?.players);
 
-    currentGame = await Game.findById(req.body.gameId);
+    // if there isn't a game already, start a new game
 
-    if (currentGame) {
-        console.log('retrieving an existing game');
-        await updateExistingGame(currentGame);
-    } else {
-        console.log('creating a new game ');
+    if (!currentGame?._id) {
+
         const newGame = await startNewGame();
         try {
             currentGame = await new Game(newGame).save();
@@ -35,15 +24,12 @@ export const startGame = async (req, res) => {
         }
     }
 
+    // send game ID and players to client
     try {
-        res.status(201).json(currentGame._id);
+        res.status(201).json({_id: currentGame._id, players: currentGame.players});
     } catch (error) {
         res.status(409).json({message: error});
     }
-}
-
-const updateExistingGame = (currentGame) => async (req, res) => {
-    updateDecksFromGame(currentGame.deck, currentGame.discard);
 }
 
 const startNewGame = async (currentGame) => {
@@ -58,34 +44,38 @@ const startNewGame = async (currentGame) => {
 
 }
 
+// CARDS
+
 export const updateDeck = async (cardsDrawn) => {
 
-    const newDeck = currentGame.deck.filter(card => (
-        !cardsDrawn.some(({_id}) => {
-            return JSON.stringify(_id) === JSON.stringify(card._id);
-        })
-    ));
+    const newDeck = currentGame.deck.filter(card => {
+     // console.log('card match? ', typeof card, typeof cardsDrawn[0], card === cardsDrawn[0]);
+        (
+            !cardsDrawn.some(({_id}) => {
+                return JSON.stringify(_id) === JSON.stringify(card._id);
+            })
+        )
+    });
 
-    const newDiscard = currentGame.discard.concat(cardsDrawn);
 
-    const updatedGame = {...currentGame._doc, deck: newDeck, discard: newDiscard, date: new Date()};
+    currentGame = {...currentGame._doc, deck: newDeck, date: new Date()};
 
-    return Game.findByIdAndUpdate(updatedGame._id, updatedGame, {new: true});
+    return Game.findByIdAndUpdate(currentGame._id, currentGame, {new: true});
 }
 
-export const registerPlayer = async (req, res) => {
-    const player = req.body;
+export const updateReshuffledGame = async (newDeck) => {
+    currentGame = {...currentGame._doc, deck: newDeck, discard: []};
+    await Game.findByIdAndUpdate(currentGame._id, currentGame);
+}
 
-    try {
+// PLAYERS
 
-    } catch (error) {
-
+export const addPlayer = async (newPlayer) => {
+    if (players.length === 0 || players.every(player => player._id !== newPlayer._id)) {
+        players.push(newPlayer);
+        currentGame = {...currentGame._doc, players: players};
+        currentGame = await Game.findByIdAndUpdate(currentGame._id, currentGame, {new: true});
     }
 }
 
-export const addPlayer = (newPlayer) => {
-    if (players.length === 0 || players.every(player => player._id !== newPlayer._id))
-        players.push(newPlayer);
-    console.log('added player', players);
-}
 
