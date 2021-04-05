@@ -14,4 +14,5 @@ export const addCardToPlay = card => {
 export const newRound = () => {
     story = '';
     cardsInPlay = [];
+    return cardsInPlay;
 }

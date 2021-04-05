@@ -1,7 +1,7 @@
 import {Server} from 'socket.io';
 import express from "express";
 import * as http from "http";
-import {addCardToPlay, submitStory} from "../controllers/roundController.js";
+import {addCardToPlay, newRound, submitStory} from "../controllers/roundController.js";
 
 export const app = express();
 export const server = http.createServer(app);
@@ -20,7 +20,14 @@ io.on('connection', (socket) => {
 
     socket.on('card played', card => {
         const updatedCardsinPlay = addCardToPlay(card);
-        io.emit('updated play', updatedCardsinPlay);
+        sendUpdatedPlay(updatedCardsinPlay);
+    })
+
+    socket.on('round finished', () => {
+        sendUpdatedPlay(newRound());
     })
 });
 
+const sendUpdatedPlay = (cards) => {
+    io.emit('updated play', cards);
+}
