@@ -1,8 +1,8 @@
 import express from "express";
-import {startGame,} from '../controllers/gameController.js';
+import {joinGame, startGame,} from '../controllers/gameController.js';
 
 const router = express.Router();
 
-router.post('/start', startGame);
+router.post('/start', joinGame);
 
 export default router;

@@ -6,6 +6,7 @@ import playerRoutes from './routes/playerRoutes.js';
 import cardRoutes from "./routes/cardRoutes.js";
 import gameRoutes from './routes/gameRoutes.js';
 import {app, server, io} from "./service/socketIO.js";
+import {startGame} from "./controllers/gameController.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
     res.send('Dixit starts here!')
 });
 
+startGame();
 
 const PORT = process.env.PORT || 5000;
 

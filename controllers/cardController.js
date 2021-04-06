@@ -34,7 +34,7 @@ export const initDeck = async () => {
         const deck = await Card.find();
         startingDeck = [...deck].sort(() => Math.random() - 0.5);
         discardDeck = [];
-        return [...startingDeck];
+        return startingDeck;
     } catch (error) {
         console.log(error.message);
     }

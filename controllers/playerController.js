@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 import Player from '../models/playerModel.js';
-import {addPlayer, players} from "./gameController.js";
-import {io} from "../service/socketIO.js";
 
 export const getPlayers = async (req, res) => {
     try {
@@ -13,19 +11,13 @@ export const getPlayers = async (req, res) => {
 }
 
 export const createPlayer = async (req, res) => {
-    if (players.every(player => player.clientId !== req.body.clientId)) {
         try {
             const generatedPlayer = await new Player(req.body).save();
             res.status(201).json(generatedPlayer);
-            await addPlayer(generatedPlayer);
-            io.emit('player joined', generatedPlayer);
+            // await addPlayer(generatedPlayer);
         } catch (error) {
             res.status(409).json({message: error.message});
         }
-    } else {
-        console.log('player already exists');
-        res.status(409).json({message: 'Player already exists'});
-    }
 }
 
 export const getPlayer = async (req, res) => {
