@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 
 const roundSchema = mongoose.Schema({
     story: String,
+    cardsInPlay: [{
+
+    }]
 })
 
 const Round = mongoose.model('Round', roundSchema);
