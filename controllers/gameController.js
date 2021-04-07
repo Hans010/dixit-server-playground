@@ -5,7 +5,7 @@ import {io} from "../service/socketIO.js";
 let currentGame = {};
 export let players = [];
 
-// GAME
+//  GAME
 
 export const startGame = async () => {
 
