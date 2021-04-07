@@ -23,7 +23,7 @@ export const startGame = async () => {
 
 export const joinGame = async (req, res) => {
 
-    console.log('currentGame from joiin', currentGame);
+    console.log('currentGame from join', currentGame);
     const newPlayer = req.body.player;
     console.log('new player wants to join', newPlayer);
     if (players.length === 0 || players.every(player => player._id !== newPlayer._id)) {
@@ -54,6 +54,8 @@ const startNewGame = async () => {
 // CARDS
 
 export const updateDeck = async (cardsDrawn) => {
+
+    console.log('currentGame', currentGame);
 
     const newDeck = currentGame.deck.filter(card => {
         // console.log('card match? ', typeof card, typeof cardsDrawn[0], card === cardsDrawn[0]);
