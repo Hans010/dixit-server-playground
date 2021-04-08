@@ -1,44 +1,45 @@
 import Game from "../models/gameModel.js";
-import {initDeck, updateDecksFromGame} from "./cardController.js";
+import {initDeck} from "./cardController.js";
 import {io} from "../service/socketIO.js";
+import Round from "../models/roundModel.js";
 
-let currentGame = {};
-export let players = [];
+export let gameId = '';
 
 //  GAME
 
 export const startGame = async () => {
 
-    console.log('start game from server');
+    console.log('start game from server ');
 
-    const newGame = await startNewGame();
-
+    const startgame = await startNewGame();
     try {
-        currentGame = await new Game(newGame).save();
+        const {_id: id} = await new Game(startgame).save();
+        gameId = id;
     } catch (error) {
         console.log(error);
     }
-    console.log('got game', currentGame);
+    console.log('game ID', gameId);
 }
 
 export const joinGame = async (req, res) => {
 
-    console.log('currentGame from join', currentGame);
     const newPlayer = req.body.player;
-    console.log('new player wants to join', newPlayer);
+    const game = await Game.findById(gameId);
+
+    const players = [...game.players];
+
     if (players.length === 0 || players.every(player => player._id !== newPlayer._id)) {
         players.push(newPlayer);
-        currentGame = {...currentGame._doc, players: players};
-        currentGame = await Game.findByIdAndUpdate(currentGame._id, currentGame, {new: true});
+        const updatedGame = {...game._doc, players: players};
+        await Game.findByIdAndUpdate(gameId, updatedGame, {new: true});
 
         io.emit('player joined', newPlayer);
+    }
 
-
-        try {
-            res.status(201).json({_id: currentGame._id, players: currentGame.players});
-        } catch (error) {
-            res.status(409).json({message: error});
-        }
+    try {
+        res.status(201).json({_id: gameId, players: players});
+    } catch (error) {
+        res.status(409).json({message: error});
     }
 }
 
@@ -53,29 +54,13 @@ const startNewGame = async () => {
 
 // CARDS
 
-export const updateDeck = async (cardsDrawn) => {
 
-    console.log('currentGame', currentGame);
-
-    const newDeck = currentGame.deck.filter(card => {
-        // console.log('card match? ', typeof card, typeof cardsDrawn[0], card === cardsDrawn[0]);
-        (
-            !cardsDrawn.some(({_id}) => {
-                return JSON.stringify(_id) === JSON.stringify(card._id);
-            })
-        )
-    });
-
-
-    currentGame = {...currentGame._doc, deck: newDeck, date: new Date()};
-
-    return Game.findByIdAndUpdate(currentGame._id, currentGame, {new: true});
+export const getLastGameId = async (req, res) => {
+    const lastGame = await Round.find().sort({_id: -1}).limit(1);
+    console.log('latestgame ', lastGame[0]._id);
+    try {
+        res.status(200).json({_id: lastGame[0]._id});
+    } catch (error) {
+        res.status(409).json({message: error});
+    }
 }
-
-export const updateReshuffledGame = async (newDeck) => {
-    currentGame = {...currentGame._doc, deck: newDeck, discard: []};
-    await Game.findByIdAndUpdate(currentGame._id, currentGame);
-}
-
-// PLAYERS
-

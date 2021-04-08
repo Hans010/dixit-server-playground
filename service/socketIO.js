@@ -18,8 +18,8 @@ io.on('connection', (socket) => {
         io.emit('new story', story);
     })
 
-    socket.on('card played', card => {
-        const updatedCardsinPlay = addCardToPlay(card);
+    socket.on('card played', async card => {
+        const updatedCardsinPlay = await addCardToPlay(card);
         sendUpdatedPlay(updatedCardsinPlay);
     })
 
@@ -28,11 +28,21 @@ io.on('connection', (socket) => {
     })
 
     socket.on('card voted', cardVote => {
-       if (voteInCard(cardVote)) io.emit('vote success')
+        if (voteInCard(cardVote)) io.emit('vote success')
         else io.emit('vote fail');
     })
+
+    socket.on('new round', async () => {
+        const storyTellerId = await newRound();
+        sendNewStoryTeller(storyTellerId);
+    })
+
 });
 
 const sendUpdatedPlay = (cards) => {
     io.emit('updated play', cards);
+}
+
+const sendNewStoryTeller = (playerId) => {
+    io.emit('new storyTeller', playerId);
 }
