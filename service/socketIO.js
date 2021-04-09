@@ -2,6 +2,7 @@ import {Server} from 'socket.io';
 import express from "express";
 import * as http from "http";
 import {addCardToPlay, newRound, submitStory, voteInCard} from "../controllers/roundController.js";
+import {playerReady2Play} from "../controllers/gameController.js";
 
 export const app = express();
 export const server = http.createServer(app);
@@ -37,6 +38,11 @@ io.on('connection', (socket) => {
         sendNewStoryTeller(storyTellerId);
     })
 
+    socket.on('player ready2Play', async (playerId) => {
+        const updatedPlayer = await playerReady2Play(playerId);
+        socket.emit('player updated', updatedPlayer);
+    })
+
 });
 
 const sendUpdatedPlay = (cards) => {
@@ -46,3 +52,4 @@ const sendUpdatedPlay = (cards) => {
 const sendNewStoryTeller = (playerId) => {
     io.emit('new storyTeller', playerId);
 }
+

@@ -6,6 +6,7 @@ const playerSchema = mongoose.Schema({
     clientId: String,
     score: {type: Number, default: 0},
     imgUrl: {type: String, default: ''},
+    ready2Play: {type: Boolean, default: false},
     date: {type: Date, default: Date.now()},
 })
 

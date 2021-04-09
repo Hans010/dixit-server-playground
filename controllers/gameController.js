@@ -7,7 +7,7 @@ export let gameId = '';
 
 //  GAME
 
-export const startGame = async () => {
+export const createGame = async () => {
 
     console.log('start game from server ');
 
@@ -51,6 +51,20 @@ const startNewGame = async () => {
         discard: [],
     }
 }
+
+// PLAYERS
+
+export const playerReady2Play = async (playerId) => {
+    const {players} = await Game.findById(gameId);
+    const updatedPlayer = (players.find(player => player._id === playerId));
+    updatedPlayer.ready2Play = true;
+    const updatedArray = players.filter(player => player._id !== playerId);
+    updatedArray.push(updatedPlayer);
+    await Game.findByIdAndUpdate(gameId, {players: updatedArray});
+    return updatedPlayer;
+
+}
+
 
 // CARDS
 
