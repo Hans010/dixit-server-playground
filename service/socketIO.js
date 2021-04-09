@@ -39,8 +39,8 @@ io.on('connection', (socket) => {
     })
 
     socket.on('player ready2Play', async (playerId) => {
-        const updatedPlayer = await playerReady2Play(playerId);
-        socket.emit('player updated', updatedPlayer);
+        const letsPlay = await playerReady2Play(playerId);
+        if (letsPlay) io.emit('lets play');
     })
 
 });
