@@ -35,12 +35,16 @@ io.on('connection', (socket) => {
 
     socket.on('new round', async () => {
         const storyTellerId = await newRound();
-        sendNewStoryTeller(storyTellerId);
+        startNewRound(storyTellerId);
     })
 
     socket.on('player ready2Play', async (playerId) => {
         const letsPlay = await playerReady2Play(playerId);
-        if (letsPlay) io.emit('lets play');
+        if (letsPlay) {
+            io.emit('lets play');
+            const storyTellerId = await newRound();
+            startNewRound(storyTellerId);
+        }
     })
 
 });
@@ -49,7 +53,8 @@ const sendUpdatedPlay = (cards) => {
     io.emit('updated play', cards);
 }
 
-const sendNewStoryTeller = (playerId) => {
+const startNewRound = (playerId) => {
     io.emit('new storyTeller', playerId);
+    io.emit('start new round');
 }
 
