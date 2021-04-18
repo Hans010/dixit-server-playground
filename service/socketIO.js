@@ -31,6 +31,7 @@ io.on('connection', (socket) => {
     socket.on('card voted', cardVote => {
         if (voteInCard(cardVote)) io.emit('vote success')
         else io.emit('vote fail');
+
     })
 
     socket.on('new round', async () => {

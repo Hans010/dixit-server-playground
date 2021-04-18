@@ -41,25 +41,21 @@ export const voteInCard = async (cardVote) => {
     const {cardsInPlay, cardVotes, _id: roundId} = await getLastRound();
 
     if (cardsInPlay.filter(card =>
-            card._id.toString() === cardVote.cardId)
-    .length !== 1
-    ) {
-        // console.log('invalid card! card voted not in array');
-        console.log('cards in play', cardsInPlay);
-        console.log('card vote', cardVote);
+        card._id.toString() === cardVote.cardId)
+        .length !== 1
+    )
         return false;
-    } else {
-        cardVotes.push(cardVote);
-        console.log('new vote added', cardVotes);
-        await Round.findByIdAndUpdate(roundId, {cardVotes: [...cardVotes]});
-        return true;
-    }
+
+    if (!cardVotes.every(vote => vote.playerId !== cardVote.playerId))
+        return false;
+
+    cardVotes.push(cardVote);
+    console.log('new vote added', cardVotes);
+    await Round.findByIdAndUpdate(roundId, {cardVotes: [...cardVotes]});
+    return true;
 }
 
-
 export const getLastRound = async () => {
-
     const lastRound = await Round.find().sort({_id: -1}).limit(1);
-    console.log('lastround id', lastRound[0]._id);
     return lastRound[0];
 }

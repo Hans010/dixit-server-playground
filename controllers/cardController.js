@@ -58,7 +58,7 @@ const drawCards = async (i) => {
         const oldDeckDraw = [...startingDeck];
         startingDeck = await initDeck();
         const newDeckDraw = startingDeck.splice(0, i - oldDeckDraw.length);
-        await Game.findByIdAndUpdate(gameId, {deck: [...startingDeck], discard: []})
+        await Game.findByIdAndUpdate(gameId, {deck: [...startingDeck], discard: []}, {new:true})
         return oldDeckDraw.concat(newDeckDraw);
     } else {
         console.log(' dealing ', i, ' cards');
