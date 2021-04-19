@@ -7,6 +7,7 @@ import cardRoutes from "./routes/cardRoutes.js";
 import gameRoutes from './routes/gameRoutes.js';
 import {app, server, io} from "./service/socketIO.js";
 import {createGame} from "./controllers/gameController.js";
+import {resolveVotes} from "./controllers/roundController.js";
 
 dotenv.config();
 

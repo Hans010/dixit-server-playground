@@ -1,7 +1,7 @@
 import {Server} from 'socket.io';
 import express from "express";
 import * as http from "http";
-import {addCardToPlay, newRound, submitStory, voteInCard} from "../controllers/roundController.js";
+import {addCardToPlay, newRound, submitStory, voteInCard, resolveVotes} from "../controllers/roundController.js";
 import {playerReady2Play} from "../controllers/gameController.js";
 
 export const app = express();
@@ -28,10 +28,23 @@ io.on('connection', (socket) => {
         sendUpdatedPlay(newRound());
     })
 
-    socket.on('card voted', cardVote => {
-        if (voteInCard(cardVote)) io.emit('vote success')
-        else io.emit('vote fail');
-
+    socket.on('card voted', async cardVote => {
+        const voteStatus = await voteInCard(cardVote);
+        console.log(voteStatus);
+        if (voteStatus) {
+            io.emit('vote success')
+            if (voteStatus.allVotes) {
+                const results = await resolveVotes();
+                // console.log(results);
+                sendUpdatedScores(results);
+            }
+        } else io.emit('vote fail');
+    })
+    ///DELETE!!!
+    socket.on('resolve', async () => {
+        const results = await resolveVotes();
+        console.log('results', results);
+        sendUpdatedScores(results);
     })
 
     socket.on('new round', async () => {
@@ -59,3 +72,6 @@ const startNewRound = (playerId) => {
     io.emit('start new round');
 }
 
+const sendUpdatedScores = (scores) => {
+    io.emit('updated scores', scores);
+}

@@ -9,8 +9,9 @@ const roundSchema = mongoose.Schema({
         imageUrl: {type: String}
     }],
     cardVotes: [{
-        cardId: String,
-        playerId: String
+        cardVoted: String,
+        playerId: String,
+        cardPlayed: String
     }],
     gameId: String,
     players: [],
