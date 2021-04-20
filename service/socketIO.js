@@ -37,14 +37,10 @@ io.on('connection', (socket) => {
                 const results = await resolveVotes();
                 // console.log(results);
                 sendUpdatedScores(results);
+                const storyTellerId = await newRound();
+                startNewRound(storyTellerId);
             }
         } else io.emit('vote fail');
-    })
-    ///DELETE!!!
-    socket.on('resolve', async () => {
-        const results = await resolveVotes();
-        console.log('results', results);
-        sendUpdatedScores(results);
     })
 
     socket.on('new round', async () => {
