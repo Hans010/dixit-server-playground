@@ -5,9 +5,9 @@ import dotenv from 'dotenv';
 import playerRoutes from './routes/playerRoutes.js';
 import cardRoutes from "./routes/cardRoutes.js";
 import gameRoutes from './routes/gameRoutes.js';
+import devRoutes from "./routes/devRoutes.js";
 import {app, server, io} from "./service/socketIO.js";
 import {createGame} from "./controllers/gameController.js";
-import {resolveVotes} from "./controllers/roundController.js";
 
 dotenv.config();
 
@@ -18,6 +18,7 @@ app.use(cors());
 app.use('/player', playerRoutes);
 app.use('/game', gameRoutes);
 app.use('/card', cardRoutes);
+app.use('/dev', devRoutes);
 
 app.get('/', (req, res) => {
     res.send('Dixit starts here!')

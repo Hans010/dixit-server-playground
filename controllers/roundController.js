@@ -76,6 +76,8 @@ export const resolveVotes = async () => {
         return vote.cardVoted === JSON.stringify(storyCard._id).replace(/["]+/g, '');
     });
 
+    const {discard} = await Game.findById(gameId);
+    await Game.findByIdAndUpdate(gameId, {discard: [...discard, ...cardsInPlay]});
     //Storyteller score check
     // if storyteller has some but not all votes
     if (votesOnStoryteller.length > 0 && votesOnStoryteller.length < cardVotes.length) {
