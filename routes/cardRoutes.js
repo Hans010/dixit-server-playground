@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get('/', getCards);
 router.get('/:cards', dealCards);
+// router.post('/:cards', dealCards);
 router.post('/newCard', createCard);
 
 export default router;

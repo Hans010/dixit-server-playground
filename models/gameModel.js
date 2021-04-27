@@ -6,7 +6,7 @@ const gameSchema = mongoose.Schema({
     players: [],
     storyTeller: String,
     date: {type: Date, default: Date.now(),
-    rounds: []}
+    rounds: []},
 })
 
 

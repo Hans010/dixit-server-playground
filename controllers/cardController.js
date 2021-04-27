@@ -2,6 +2,8 @@ import Card from '../models/cardModel.js';
 import {gameId} from "./gameController.js";
 import Game from "../models/gameModel.js";
 
+let counter = 0;
+
 export const getCards = async (req, res) => {
 
     try {
@@ -37,9 +39,14 @@ export const initDeck = async () => {
 
 export const dealCards = async (req, res) => {
 
+    counter++;
     const {cards: cards2Deal} = req.params;
 
+    // const clientId = req.body;
+    // console.log('clientId', clientId);
+
     const cards = await drawCards(cards2Deal);
+    // const cards = 'await drawCards(cards2Deal);'
 
     try {
         res.status(200).json(cards);
@@ -49,7 +56,7 @@ export const dealCards = async (req, res) => {
 }
 
 const drawCards = async (i) => {
-    console.log('drawing cards');
+    console.log('drawing cards ');
     let game = await Game.findById(gameId);
     let startingDeck = game.deck;
     let cards = [];
@@ -58,20 +65,17 @@ const drawCards = async (i) => {
         const oldDeckDraw = [...startingDeck];
         startingDeck = await initDeck();
         const newDeckDraw = startingDeck.splice(0, i - oldDeckDraw.length);
-        await Game.findByIdAndUpdate(gameId, {deck: [...startingDeck], discard: []}, {new:true})
+        await Game.findByIdAndUpdate(gameId, {deck: [...startingDeck], discard: [], lastModified: Date.now()}, {new:true})
         return oldDeckDraw.concat(newDeckDraw);
     } else {
+
         console.log(' dealing ', i, ' cards');
         cards = startingDeck.splice(0, i);
         const gam = await Game.findByIdAndUpdate(gameId, {
             deck: [...startingDeck],
         }, {new: true});
         console.log('updated game ', gam.deck.length);
+        console.log('counter', counter);
         return cards;
     }
-}
-
-export const discardCards = async discardedCards => {
-
-
 }
