@@ -1,8 +1,10 @@
 import Card from '../models/cardModel.js';
 import {gameId} from "./gameController.js";
 import Game from "../models/gameModel.js";
+import Round from "../models/roundModel.js";
 
-let counter = 0;
+let roundCards = [];
+let initialRound = true;
 
 export const getCards = async (req, res) => {
 
@@ -39,14 +41,9 @@ export const initDeck = async () => {
 
 export const dealCards = async (req, res) => {
 
-    counter++;
     const {cards: cards2Deal} = req.params;
 
-    // const clientId = req.body;
-    // console.log('clientId', clientId);
-
     const cards = await drawCards(cards2Deal);
-    // const cards = 'await drawCards(cards2Deal);'
 
     try {
         res.status(200).json(cards);
@@ -55,27 +52,39 @@ export const dealCards = async (req, res) => {
     }
 }
 
+
 const drawCards = async (i) => {
-    console.log('drawing cards ');
-    let game = await Game.findById(gameId);
-    let startingDeck = game.deck;
-    let cards = [];
 
-    if (i > startingDeck.length) {
-        const oldDeckDraw = [...startingDeck];
-        startingDeck = await initDeck();
-        const newDeckDraw = startingDeck.splice(0, i - oldDeckDraw.length);
-        await Game.findByIdAndUpdate(gameId, {deck: [...startingDeck], discard: [], lastModified: Date.now()}, {new:true})
-        return oldDeckDraw.concat(newDeckDraw);
-    } else {
-
-        console.log(' dealing ', i, ' cards');
-        cards = startingDeck.splice(0, i);
-        const gam = await Game.findByIdAndUpdate(gameId, {
-            deck: [...startingDeck],
-        }, {new: true});
-        console.log('updated game ', gam.deck.length);
-        console.log('counter', counter);
-        return cards;
+    if (roundCards.length === 0) {
+        await getRoundCards();
     }
+
+    return roundCards.splice(0, i);
+
+}
+
+export const getRoundCards = async () => {
+    const {players, deck} = await Game.findById(gameId);
+    if (initialRound) {
+        roundCards = deck.splice(0, (6 * players.length));
+        initialRound = false;
+    } else {
+        const necessaryCards = players.length;
+        if (deck.length < necessaryCards) {
+            roundCards = [...deck];
+
+            let newDeck = await initDeck();
+
+            roundCards.concat(newDeck.splice(0, (necessaryCards - roundCards.length)));
+
+            await Game.findByIdAndUpdate(gameId, {
+                deck: [...newDeck],
+                discard: [],
+                lastModified: Date.now()
+            }, {new: true})
+        } else {
+            roundCards = deck.splice(0, players.length);
+        }
+    }
+    await Game.findByIdAndUpdate(gameId, {deck: [...deck]});
 }

@@ -1,5 +1,5 @@
 import Game from "../models/gameModel.js";
-import {initDeck} from "./cardController.js";
+import {getRoundCards, initDeck} from "./cardController.js";
 import {io} from "../service/socketIO.js";
 import Round from "../models/roundModel.js";
 
@@ -62,6 +62,7 @@ export const playerReady2Play = async (playerId) => {
     const updatedArray = players.filter(player => player._id !== playerId);
     updatedArray.push(updatedPlayer);
     await Game.findByIdAndUpdate(gameId, {players: updatedArray});
+    if (updatedArray.every(player => player.ready2Play)) await getRoundCards();
     return updatedArray.every(player => player.ready2Play);
 
 }
