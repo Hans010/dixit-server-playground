@@ -60,7 +60,6 @@ const drawCards = async (i) => {
     }
 
     return roundCards.splice(0, i);
-
 }
 
 export const getRoundCards = async () => {
