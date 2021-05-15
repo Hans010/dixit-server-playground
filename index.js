@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
     res.send('Dixit starts here!')
 });
 
-createGame();
+// createGame();
 
 const PORT = process.env.PORT || 5000;
 
